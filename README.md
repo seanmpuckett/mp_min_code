@@ -6,6 +6,8 @@ A lightweight, efficient binary serialization module for MicroPython.
 
 `min_code` provides fast encoding/decoding of Python data structures to/from a compact binary format. Supports integers, floats, strings, bytes, lists, dicts, and None.
 
+Designed to take up very little bytecode space. You can still easily extend it if you want more data types.
+
 ## Functions
 
 ### `encode(v, stream=None)`
