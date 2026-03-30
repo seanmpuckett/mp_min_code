@@ -43,7 +43,7 @@ obj = min_code.decode(data)
 
 | Type | Notes |
 |------|-------|
-| `int` | Any size (optimized for small ints) |
+| `int` | 32 bit signed integer (traps on bignums) optimized for small ints |
 | `float` | 32-bit precision |
 | `str` | UTF-8 encoded |
 | `bytes` / `bytearray` | Raw binary data |
