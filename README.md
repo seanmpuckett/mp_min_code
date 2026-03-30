@@ -89,3 +89,9 @@ packed = min_code.encode(complex_data)
 - Small ints: `0x40-0x7F` (value - 0x80)
 - Strings/bytes: type nibble + length (0-13 inline, 0x0E = 1-byte length, 0x0F = 4-byte length)
 - Lists/dicts: start marker (`0x30`/`0x31`) followed by items, end with `0x32`
+
+# License
+
+2026 shea m puckett
+MIT license
+
