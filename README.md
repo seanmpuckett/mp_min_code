@@ -4,7 +4,7 @@ A lightweight, efficient binary serialization module for MicroPython.
 
 ## Overview
 
-`min_code` provides fast encoding/decoding of Python data structures to/from a compact binary format. Supports integers, floats, strings, bytes, lists, dicts, and None.
+`min_code` provides fast encoding/decoding of Python data structures to/from a compact binary format. Supports integers, floats, bool, strings, bytes, lists, dicts, and None.
 
 Designed to take up very little bytecode space. The MPY file is about 1.5k.
 
@@ -50,7 +50,7 @@ obj = min_code.decode(data)
 | `list` / `tuple` | Sequences (tuples decode as lists) |
 | `dict` | Keys/values can be any supported type |
 | `None` | |
-| `bool` | Encoded as 0/1 integers, decode as int |
+| `bool` | True and False |
 
 ## Examples
 
@@ -84,7 +84,6 @@ packed = min_code.encode(complex_data)
 - Compact format: small ints use 1 byte, larger ints use 2-5 bytes
 - Strings ≤13 bytes stored inline; larger strings use length prefix
 - 32-bit floats only (not 64-bit)
-- Booleans encode as integers; decode as `0`/`1`, not `True`/`False`
 
 ## Binary Format (Reference)
 
