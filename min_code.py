@@ -1,9 +1,11 @@
 # min_code.py
-#
-# shea m puckett - 2026
-# mit license
 
 import struct, io 
+
+try:
+    _test = const(0)
+except:
+    def const(a): return a
 
 VERSION = const(0)
 
@@ -18,6 +20,8 @@ I16  = const(0x28)
 I32  = const(0x29)
 F32  = const(0x2a)
 NONE = const(0x2b)
+TRUE = const(0x2c)
+FALSE= const(0x2e)
 
 LIST = const(0x30)
 DICT = const(0x31)
@@ -48,9 +52,6 @@ def encode(v, stream=None):
         w(b)
 
     def enc(x):
-        if x is True: x = 1
-        elif x is False: x = 0
-                        
         t = type(x)
         if t is int:
             if -0x40 <= x <= 0x7f:                wb(x+0x80)  # TINT + 64
@@ -60,6 +61,8 @@ def encode(v, stream=None):
             else: raise ValueError()
         elif t is float:                          wb(F32); wp(">f", x)
         elif x is None:                           wb(NONE)
+        elif x is True:                           wb(TRUE)
+        elif x is False:                          wb(FALSE)
         elif t is str:                            _bytes(x.encode(), STRS)
         elif t is bytes or t is bytearray:        _bytes(x, BINS)
         elif t is list or t is tuple:
@@ -115,10 +118,12 @@ def decode(src):
         elif b == I32:          push(u(">i", r(4))[0])
         elif b == F32:          push(u(">f", r(4))[0])
         elif b == NONE:         push(None)
+        elif b == TRUE:         push(True)
+        elif b == FALSE:        push(False)
         elif b == LIST:         stack.append([LIST, []])
         elif b == DICT:         stack.append([DICT, {}, flag])
         elif b == POP:          push(stack.pop()[1])
         elif b == END:          return out
         else:                   break  # unknown code
     raise flag
-            
+          
