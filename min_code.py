@@ -16,16 +16,17 @@ BSL4 = const(0x0F)
 STRE = const(0x1F)
 
 IXS  = const(0x20)  
-I16  = const(0x28)  
-I32  = const(0x29)
-F32  = const(0x2a)
-NONE = const(0x2b)
-TRUE = const(0x2c)
-FALSE= const(0x2e)
 
-LIST = const(0x30)
-DICT = const(0x31)
-POP  = const(0x32)
+I16  = const(0x30)
+BPOS = const(0x31)
+BNEG = const(0x32)
+F32  = const(0x33)
+LIST = const(0x34)
+DICT = const(0x35)
+POP  = const(0x36)
+NONE = const(0x37)
+TRUE = const(0x38)
+FALSE= const(0x39)
 
 VER  = const(0x3E)
 END  = const(0x3F)
@@ -55,10 +56,13 @@ def encode(v, stream=None):
         t = type(x)
         if t is int:
             if -0x40 <= x <= 0x7f:                wb(x+0x80)  # TINT + 64
-            elif -0x400 <= x <= 0x3ff:            wb(IXS | ((x & 0x700) >> 8)); wb(x & 0xff)
-            elif -0x8000 <= x <= 0x7fff:          wb(I16); wp(">h", x)
-            elif -0x80000000 <= x <= 0x7fffffff:  wb(I32); wp(">i", x)
-            else: raise ValueError()
+            elif -0x400 <= x <= 0xbff:            x += 0x400; wb(IXS | (x >> 8)); wb(x & 0xff)
+            elif -0x4000 <= x <= 0xbfff:          wb(I16); x += 0x4000; wb(x >> 8); wb(x & 0xff)
+            else: 
+              if x < 0: x = -x; wb(BNEG)
+              else: wb(BPOS)
+              while x > 0x7f: wb(x & 0x7f); x >>= 7
+              wb(x | 0x80)
         elif t is float:                          wb(F32); wp(">f", x)
         elif x is None:                           wb(NONE)
         elif x is True:                           wb(TRUE)
@@ -92,7 +96,7 @@ def decode(src):
 
     stack = []
     out = None  
-
+    
     def push(v):
         nonlocal out
         if not stack:           out = v; return
@@ -109,13 +113,19 @@ def decode(src):
             l = b & 0x0f
             if l == BSL1:       l = r(1)[0]
             elif l == BSL4:     l = u(">I",r(4))[0]
-            d = r(l)
-            push(d.decode() if b < BINS else d)
+            v = r(l)
+            push(v.decode() if b < BINS else v)
         elif b < I16: 
-            v = ((b & 7) << 8) + r(1)[0]
-            push(v - 0x800 if v & 0x400 else v)
-        elif b == I16:          push(u(">h", r(2))[0])
-        elif b == I32:          push(u(">i", r(4))[0])
+            push((((b & 0xF) << 8) + r(1)[0]) - 0x400)
+        elif b == I16:          l = r(2); push( ((l[0]<<8)|l[1]) - 0x4000)
+        elif b == BPOS or b == BNEG:
+          v = l = 0
+          while True:
+            b2 = r(1)[0]
+            v |= (b2 & 0x7f) << l
+            l += 7
+            if b2 & 0x80: break
+          push(-v if b == BNEG else v)
         elif b == F32:          push(u(">f", r(4))[0])
         elif b == NONE:         push(None)
         elif b == TRUE:         push(True)
@@ -126,4 +136,5 @@ def decode(src):
         elif b == END:          return out
         else:                   break  # unknown code
     raise flag
-          
+            
+  
