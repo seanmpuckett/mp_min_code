@@ -8,7 +8,7 @@ A lightweight, efficient binary serialization module for MicroPython.
 
 Designed to take up very little bytecode space. The MPY file is about 1.5k.
 
-You can still easily extend it if you want more data types.
+You can easily extend it if you want more data types.
 
 ## Functions
 
@@ -16,7 +16,7 @@ You can still easily extend it if you want more data types.
 Serialize a Python value to binary format.
 
 **Parameters:**
-- `v` - Value to encode (int, float, str, bytes, list, dict, None)
+- `v` - Value to encode (int, float, str, bytes, list, dict, bool, None)
 - `stream` - Optional writeable stream. If omitted, returns `bytes`.
 
 **Returns:** `bytes` if `stream` is None, otherwise `None`.
@@ -43,7 +43,7 @@ obj = min_code.decode(data)
 
 | Type | Notes |
 |------|-------|
-| `int` | 32 bit signed integer (traps on bignums) optimized for small ints |
+| `int` | signed integer, optimized for small ints |
 | `float` | 32-bit precision |
 | `str` | UTF-8 encoded |
 | `bytes` / `bytearray` | Raw binary data |
@@ -81,7 +81,7 @@ packed = min_code.encode(complex_data)
 
 ## Performance Notes
 
-- Compact format: small ints use 1 byte, larger ints use 2-5 bytes
+- Compact format: small ints use 1 byte, larger ints use 2+ bytes
 - Strings ≤13 bytes stored inline; larger strings use length prefix
 - 32-bit floats only (not 64-bit)
 
